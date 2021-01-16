@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TwoSideSeekBar">
+        <attr name="android:progressBackgroundTint"/>
+        <attr name="android:progressTint"/>
+        <attr name="android:colorControlActivated"/>
+        <attr name="tssb_progress_line_height" format="reference|dimension"/>
+    </declare-styleable>
+</resources>
