@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.ColorInt
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
@@ -37,14 +38,14 @@ class TwoSideSeekBar @JvmOverloads constructor(
         alpha = 255 / 5
     }
 
-    var progress: Int = 0
+    private var progress: Int = 0
 
     private var min = -50
     private var max = 50
 
     private var progressLineHeight = 2F.toDp()
-    private var dotRadius: Float
-    private var dotShadowRadius: Float
+    private var dotRadius = progressLineHeight * 4
+    private var dotShadowRadius = progressLineHeight * 10
 
     private var progressBackgroundTint = Color.GRAY
     private var progressTint = Color.BLACK
@@ -57,9 +58,9 @@ class TwoSideSeekBar @JvmOverloads constructor(
     init {
         attrs?.let(::initAttrs)
 
-        dotRadius = progressLineHeight * 4
-        dotShadowRadius = progressLineHeight * 10
-        paintBackground.color = progressBackgroundTint
+        setDotsRadius()
+
+        setColors()
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -99,6 +100,18 @@ class TwoSideSeekBar @JvmOverloads constructor(
             dotRadius,
             paintDot
         )
+    }
+
+    private fun setDotsRadius() {
+        dotRadius = progressLineHeight * 4
+        dotShadowRadius = progressLineHeight * 10
+    }
+
+    private fun setColors() {
+        paintBackground.color = progressBackgroundTint
+        paintDot.color = colorControlActivated
+        paintDotShadow.color = colorControlActivated
+        paintDotShadow.alpha = 255 / 5
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -152,7 +165,7 @@ class TwoSideSeekBar @JvmOverloads constructor(
             }
         }
 
-        onChangeListener?.onProgressChanged(progress)
+        onChangeListener?.onProgressChanged(progress, true)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -180,12 +193,55 @@ class TwoSideSeekBar @JvmOverloads constructor(
         }
     }
 
+    fun setMax(value: Int) {
+        if (value <= 0) {
+            throw IllegalArgumentException("Value must be greater than zero!")
+        }
+        max = value
+        min = -value
+        invalidate()
+    }
+
+    fun setProgress(value: Int) {
+        if (value > max || value < min) {
+            throw IllegalArgumentException("Value must be in range min..max")
+        }
+        progress = value
+        onChangeListener?.onProgressChanged(progress, false)
+        invalidate()
+    }
+
+    fun setProgressBackgroundTint(@ColorInt color: Int) {
+        progressBackgroundTint = color
+        paintBackground.color = progressBackgroundTint
+        invalidate()
+    }
+
+    fun setProgressTint(@ColorInt color: Int) {
+        progressTint = color
+        paintProgress.color = progressTint
+        invalidate()
+    }
+
+    fun setColorControlActivated(@ColorInt color: Int) {
+        colorControlActivated = color
+        paintDot.color = colorControlActivated
+        paintDotShadow.color = colorControlActivated
+    }
+
+    fun setProgressLineHeight(value: Float) {
+        progressLineHeight = value
+        setDotsRadius()
+        requestLayout()
+        invalidate()
+    }
+
     fun setOnChangeListener(listener: OnChangeListener) {
         this.onChangeListener = listener
     }
 
     interface OnChangeListener {
-        fun onProgressChanged(progress: Int)
+        fun onProgressChanged(progress: Int, fromUser: Boolean)
     }
 
     private fun initAttrs(attrs: AttributeSet) {
