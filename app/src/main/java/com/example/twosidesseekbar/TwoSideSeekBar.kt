@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -36,9 +37,9 @@ class TwoSideSeekBar @JvmOverloads constructor(
         alpha = 255 / 5
     }
 
-    private var progress: Int = 50
+    var progress: Int = 0
 
-    private var min = 0
+    private var min = -100
     private var max = 100
 
     private var progressLineHeight = 2F.toDp()
@@ -58,6 +59,7 @@ class TwoSideSeekBar @JvmOverloads constructor(
 
         dotRadius = progressLineHeight * 4
         dotShadowRadius = progressLineHeight * 10
+        paintBackground.color = progressBackgroundTint
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -74,36 +76,25 @@ class TwoSideSeekBar @JvmOverloads constructor(
         )
 
         // progress
-        if (this.progress > max / 2) {
-            canvas.drawRect(
-                width / 2F,
-                height / 2F - progressLineHeight / 2F,
-                width / 2F + (width - dotShadowRadius * 2) / max * (progress - max / 2),
-                height / 2F + progressLineHeight / 2F,
-                paintProgress
-            )
-        }
-        if (this.progress < max / 2) {
-            canvas.drawRect(
-                width / 2F - (width - dotShadowRadius * 2) / max * (max / 2 - progress),
-                height / 2F - progressLineHeight / 2F,
-                width / 2F,
-                height / 2F + progressLineHeight / 2F,
-                paintProgress
-            )
-        }
+        canvas.drawRect(
+            width / 2F + (width / 2F - dotShadowRadius) / max * progress,
+            height / 2F - progressLineHeight / 2F,
+            width / 2F,
+            height / 2F + progressLineHeight / 2F,
+            paintProgress
+        )
 
         // dot
         if (pressedDot) {
             canvas.drawCircle(
-                width / 2F - (width - dotShadowRadius * 2) / max * (max / 2 - progress),
+                width / 2F + (width / 2F - dotShadowRadius) / max * progress,
                 height / 2F,
                 dotShadowRadius,
                 paintDotShadow
             )
         }
         canvas.drawCircle(
-            width / 2F - (width - dotShadowRadius * 2) / max * (max / 2 - progress),
+            width / 2F + (width / 2F - dotShadowRadius) / max * progress,
             height / 2F,
             dotRadius,
             paintDot
@@ -146,13 +137,19 @@ class TwoSideSeekBar @JvmOverloads constructor(
 
             x > width - dotShadowRadius -> max
 
-            else -> ((x - dotShadowRadius) / (width - dotShadowRadius * 2) * max).toInt()
-        }
-
-        if (progress > 100) {
-            progress = 100
-        } else if (progress < 0) {
-            progress = 0
+            else -> {
+                when {
+                    x < width / 2 -> {
+                        (abs(x - width / 2F) / -(width / 2F - dotShadowRadius) * 100).toInt()
+                    }
+                    x > width / 2 -> {
+                        (abs(x - width / 2F) / (width / 2F - dotShadowRadius) * 100).toInt()
+                    }
+                    else -> {
+                        (min + max) / 2
+                    }
+                }
+            }
         }
 
         onChangeListener?.onProgressChanged(progress)
