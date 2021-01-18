@@ -9,7 +9,6 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
-import androidx.annotation.ColorInt
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
@@ -38,18 +37,53 @@ class TwoSideSeekBar @JvmOverloads constructor(
         alpha = 255 / 5
     }
 
-    private var progress: Int = 0
+    var progress: Int = 0
+        set(value) {
+            if (value > max || value < min) {
+                throw IllegalArgumentException("Value must be in range min..max")
+            }
+            field = value
+            onChangeListener?.onProgressChanged(value, false)
+            invalidate()
+        }
 
-    private var min = -50
-    private var max = 50
+    var min = -50
+        private set
 
-    private var progressLineHeight = 2F.toDp()
+    var max = 50
+        private set
+
+    var progressLineHeight = 2F.toDp()
+        set(value) {
+            field = value
+            setDotsRadius()
+            requestLayout()
+            invalidate()
+        }
+
     private var dotRadius = progressLineHeight * 4
     private var dotShadowRadius = progressLineHeight * 10
 
-    private var progressBackgroundTint = Color.GRAY
-    private var progressTint = Color.BLACK
-    private var colorControlActivated = Color.BLACK
+    var progressBackgroundTint = Color.GRAY
+        set(value) {
+            field = value
+            paintBackground.color = value
+            invalidate()
+        }
+
+    var progressTint = Color.BLACK
+        set(value) {
+            field = value
+            paintProgress.color = value
+            invalidate()
+        }
+
+    var colorControlActivated = Color.BLACK
+        set(value) {
+            field = value
+            paintDot.color = colorControlActivated
+            paintDotShadow.color = colorControlActivated
+        }
 
     private var pressedDot = false
 
@@ -193,46 +227,12 @@ class TwoSideSeekBar @JvmOverloads constructor(
         }
     }
 
-    fun setMax(value: Int) {
+    fun setMinMax(value: Int) {
         if (value <= 0) {
             throw IllegalArgumentException("Value must be greater than zero!")
         }
         max = value
         min = -value
-        invalidate()
-    }
-
-    fun setProgress(value: Int) {
-        if (value > max || value < min) {
-            throw IllegalArgumentException("Value must be in range min..max")
-        }
-        progress = value
-        onChangeListener?.onProgressChanged(progress, false)
-        invalidate()
-    }
-
-    fun setProgressBackgroundTint(@ColorInt color: Int) {
-        progressBackgroundTint = color
-        paintBackground.color = progressBackgroundTint
-        invalidate()
-    }
-
-    fun setProgressTint(@ColorInt color: Int) {
-        progressTint = color
-        paintProgress.color = progressTint
-        invalidate()
-    }
-
-    fun setColorControlActivated(@ColorInt color: Int) {
-        colorControlActivated = color
-        paintDot.color = colorControlActivated
-        paintDotShadow.color = colorControlActivated
-    }
-
-    fun setProgressLineHeight(value: Float) {
-        progressLineHeight = value
-        setDotsRadius()
-        requestLayout()
         invalidate()
     }
 
@@ -263,6 +263,9 @@ class TwoSideSeekBar @JvmOverloads constructor(
             R.styleable.TwoSideSeekBar_tssb_progress_line_height,
             progressLineHeight
         )
+        progress = typedArray.getInteger(R.styleable.TwoSideSeekBar_android_progress, progress)
+
+        setMinMax(typedArray.getInteger(R.styleable.TwoSideSeekBar_tssb_min_max, max))
 
         typedArray.recycle()
     }

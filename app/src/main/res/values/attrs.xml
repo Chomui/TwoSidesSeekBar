@@ -4,6 +4,8 @@
         <attr name="android:progressBackgroundTint"/>
         <attr name="android:progressTint"/>
         <attr name="android:colorControlActivated"/>
+        <attr name="android:progress"/>
         <attr name="tssb_progress_line_height" format="reference|dimension"/>
+        <attr name="tssb_min_max" format="reference|integer"/>
     </declare-styleable>
 </resources>

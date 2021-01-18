@@ -3,7 +3,6 @@ package com.example.twosidesseekbar
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.TypedValue
-import android.widget.SeekBar
 import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
@@ -17,9 +16,9 @@ class MainActivity : AppCompatActivity() {
             }
         })
         findViewById<TextView>(R.id.text).setOnClickListener {
-            findViewById<TwoSideSeekBar>(R.id.seekBar).setProgressLineHeight(4F.toDp())
-            findViewById<TwoSideSeekBar>(R.id.seekBar).setMax(10)
-            findViewById<TwoSideSeekBar>(R.id.seekBar).setProgress(-5)
+            findViewById<TwoSideSeekBar>(R.id.seekBar).progressLineHeight = 4F.toDp()
+            findViewById<TwoSideSeekBar>(R.id.seekBar).setMinMax(10)
+            findViewById<TwoSideSeekBar>(R.id.seekBar).progress = -5
         }
     }
 
