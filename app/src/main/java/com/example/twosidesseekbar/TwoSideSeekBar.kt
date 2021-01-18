@@ -39,8 +39,8 @@ class TwoSideSeekBar @JvmOverloads constructor(
 
     var progress: Int = 0
 
-    private var min = -100
-    private var max = 100
+    private var min = -50
+    private var max = 50
 
     private var progressLineHeight = 2F.toDp()
     private var dotRadius: Float
@@ -140,10 +140,10 @@ class TwoSideSeekBar @JvmOverloads constructor(
             else -> {
                 when {
                     x < width / 2 -> {
-                        (abs(x - width / 2F) / -(width / 2F - dotShadowRadius) * 100).toInt()
+                        (abs(x - width / 2F) / -(width / 2F - dotShadowRadius) * max).toInt()
                     }
                     x > width / 2 -> {
-                        (abs(x - width / 2F) / (width / 2F - dotShadowRadius) * 100).toInt()
+                        (abs(x - width / 2F) / (width / 2F - dotShadowRadius) * max).toInt()
                     }
                     else -> {
                         (min + max) / 2
